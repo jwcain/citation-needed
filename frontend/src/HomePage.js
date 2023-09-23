@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import FetchWebpage from "./FetchWebpage.js";
 
 export default function HomePage() {
   let [textValue, setTextValue] = useState("");
@@ -52,6 +53,7 @@ function BoundedTextEntry({ onSubmit, defaultValue, lowerBound, upperBound }) {
           Entry must be between {lowerBound} and {upperBound} characters.
         </p>
       )}
+      <FetchWebpage url="http://en.wikipedia.org/?curid=18630637" />
     </div>
   );
 }
