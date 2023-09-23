@@ -1,13 +1,13 @@
 import React from "react";
-import "./FetchWebpage.css";
+import "./WikipediaPage.css";
 
-export default function FetchWebpage({ url }) {
+export default function WikipediaPage({ id }) {
   return (
     <div className="wikipage">
       <iframe
         id="inlineFrameExample"
         title="Random Wikipedia Page"
-        src={url}
+        src={"http://en.wikipedia.org/?curid=" + id}
         sandbox=""
       ></iframe>
     </div>

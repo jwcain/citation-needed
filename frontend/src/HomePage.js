@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
-import FetchWebpage from "./FetchWebpage.js";
+import WikipediaPage from "./WikipediaPage.js";
 
 export default function HomePage() {
   let [textValue, setTextValue] = useState("");
@@ -16,10 +16,12 @@ export default function HomePage() {
         upperBound={16}
       />
       <p>{textValue}</p>
+      <WikipediaPage id="18630637" />
     </div>
   );
 }
 
+/*https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info&generator=random&formatversion=2&grnnamespace=0&grnlimit=3&origin=* */
 function BoundedTextEntry({ onSubmit, defaultValue, lowerBound, upperBound }) {
   let [lastUsedValue, setLastUsedValue] = useState(defaultValue);
   let bounded =
@@ -53,7 +55,6 @@ function BoundedTextEntry({ onSubmit, defaultValue, lowerBound, upperBound }) {
           Entry must be between {lowerBound} and {upperBound} characters.
         </p>
       )}
-      <FetchWebpage url="http://en.wikipedia.org/?curid=18630637" />
     </div>
   );
 }
