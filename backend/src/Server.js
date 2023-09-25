@@ -1,6 +1,6 @@
 import http from "http";
 import path from "path";
-import { Server } from "spcket.io";
+import { Server } from "socket.io";
 import express from "express";
 
 const app = express();
