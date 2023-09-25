@@ -19,7 +19,8 @@ function RoomAuth({ roomCode, setRoomCode }) {
         lowerBound={6}
         upperBound={6}
         entryName={"Room Code"}
-        submissionText={"Enter Room Code"}
+        title="roomID"
+        submissionText={"Enter Room"}
       />
     </div>
   );

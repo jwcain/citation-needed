@@ -1,6 +1,3 @@
-import Navbar from "react-bootstrap/Navbar";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HomePage from "./HomePage.js";
 import "./App.css";
