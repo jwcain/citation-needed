@@ -2,18 +2,20 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import express from "express";
+import { Console } from "console";
 
 const app = express();
 const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "/frontend/build")));
+app.use(express.static(path.join(__dirname, "/build")));
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/frontend/build/index.html"));
+  res.sendFile(path.join(__dirname, "/build/index.html"));
 });
 
 const httpServer = http.Server(app);
 
 const io = new Server(httpServer, { cors: { origin: "*" } });
 const rooms = {};
+var serverUpTimeSeconds = 0;
 
 const eventContract = {
   ServerError: "_ServerError",
@@ -35,8 +37,10 @@ function NewRoom(roomID) {
     spectatorsAllowed: true,
     maxUsers: 5,
     lifespanSeconds: 0,
-    users: {},
-    game: {},
+    users: [],
+    game: {
+      lifespanSeconds: 0,
+    },
   };
 }
 
@@ -47,8 +51,9 @@ function RandomRoomID() {
   return "DEVDEV";
 }
 
-function SendClientNeededRoomData(socket) {
-  socket.emit(eventContract.GameUpdate, rooms[roomID].game);
+function SendClientNeededRoomData(socketID, roomID) {
+  rooms[roomID].game.lifespanSeconds = rooms[roomID].lifespanSeconds;
+  io.to(socketID).emit(eventContract.GameUpdate, rooms[roomID].game);
 }
 
 function CommunucateServerError(socket, code, message) {
@@ -59,13 +64,15 @@ function CommunucateServerError(socket, code, message) {
 }
 
 io.on("connection", (socket) => {
+  console.log("User Connection");
   socket.on(eventContract.OpenNewRoom, () => {
-    var roomID;
-    do {
-      roomID = RandomRoomID();
-    } while (roomID != "_error" && rooms[roomID] !== null);
+    console.log("open room attempt");
+
+    var roomID = RandomRoomID();
 
     if (roomID === "_error") {
+      console.log("Room open error");
+
       CommunucateServerError(
         socket,
         serverErrorContract.UnableToCreateRoom,
@@ -73,14 +80,17 @@ io.on("connection", (socket) => {
       );
       return;
     }
+
+    console.log("Creating Room");
     rooms[roomID] = NewRoom(roomID);
-    rooms[roomID] = socket.emit(eventContract.New_RoomID, roomID);
-    SendClientNeededRoomData(socket);
+    socket.emit(eventContract.New_RoomID, roomID);
+    SendClientNeededRoomData(socket.id, roomID);
   });
 
   //When a user connects to the server
   socket.on(eventContract.ConnectToRoom, (connectionInfo) => {
-    const room = rooms.find((x) => x.roomID == connectionInfo.roomID);
+    console.log("connect to room attempt");
+    const room = rooms[connectionInfo.roomID];
     if (!room) {
       CommunucateServerError(
         socket,
@@ -89,7 +99,7 @@ io.on("connection", (socket) => {
       );
       return;
     }
-    const user = room.users.find((x) => x.username === connectionInfo.username);
+    var user = room.users.find((x) => x.username === connectionInfo.username);
     if (user) {
       user.socketID = socket.id;
       user.online = true;
@@ -110,17 +120,19 @@ io.on("connection", (socket) => {
     }
 
     user = {
-      username: username,
+      username: connectionInfo.username,
       roomID: room.roomID,
       online: true,
       socketID: socket.id,
       isSpectator: wouldBeSpectator,
     };
+    console.log("pushing user");
     room.users.push(user);
+    socket.emit(eventContract.ConnectToRoom);
   });
   socket.on("disconnect", (socket) => {
     //Having to loop all games to find a user is probably bad.
-    for (const roomID of Object.keys(rooms.users)) {
+    for (const roomID of Object.keys(rooms)) {
       const user = rooms[roomID].users.find((x) => x.socketID === socket.id);
       if (user) {
         user.online = false;
@@ -139,12 +151,15 @@ httpServer.listen(PORT, () => {
 async function ServerUpdateLoop() {
   while (true) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    serverUpTimeSeconds++;
+    if (serverUpTimeSeconds % 5 === 0)
+      console.log(`Server Time: ${serverUpTimeSeconds}s`);
     if (rooms) {
       for (const roomID of Object.keys(rooms)) {
         rooms[roomID].lifespanSeconds += 1;
-        for (const username of Object.keys(rooms[roomID].users)) {
-          SendClientNeededRoomData(io.to(rooms[roomID][username].socketID));
-        }
+        rooms[roomID].users.forEach((user) =>
+          SendClientNeededRoomData(user.socketID, roomID)
+        );
         //TODO: Prune old rooms
       }
     }
