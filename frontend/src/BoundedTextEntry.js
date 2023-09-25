@@ -6,6 +6,8 @@ export default function BoundedTextEntry({
   defaultValue,
   lowerBound,
   upperBound,
+  entryName,
+  submissionText,
 }) {
   let [lastUsedValue, setLastUsedValue] = useState(defaultValue);
   let bounded =
@@ -26,7 +28,7 @@ export default function BoundedTextEntry({
       />
       <input
         type="submit"
-        value="Enter"
+        value={submissionText}
         onClick={() => {
           if (bounded === false) return;
           onSubmit(lastUsedValue);
@@ -34,9 +36,13 @@ export default function BoundedTextEntry({
       />
       {bounded ? (
         <></>
+      ) : lowerBound === upperBound ? (
+        <p>
+          {entryName} must be {lowerBound} characters.
+        </p>
       ) : (
         <p>
-          Entry must be between {lowerBound} and {upperBound} characters.
+          {entryName} must be between {lowerBound} and {upperBound} characters.
         </p>
       )}
     </div>

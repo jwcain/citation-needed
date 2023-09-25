@@ -32,3 +32,7 @@ header text {
   background-color: white;
   text-align: center;
 }
+
+.inline {
+  display: inline;
+}
