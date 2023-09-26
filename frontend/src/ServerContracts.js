@@ -4,6 +4,7 @@ export const eventContract = {
   GameUpdate: "gameUpdate",
   OpenNewRoom: "openNewRoom",
   ConnectToRoom: "connectToRoom",
+  SetReady: "setReadyState",
 };
 
 export const serverErrorContract = {

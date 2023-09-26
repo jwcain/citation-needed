@@ -199,5 +199,5 @@ export default function HomePage() {
 
   if (error) return errorBlock;
 
-  return <GameView socket={socket} username={username} room={room} />;
+  return <GameView socket={socket} localUsername={username} room={room} />;
 }

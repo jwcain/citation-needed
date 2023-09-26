@@ -6,7 +6,7 @@ const URL =
 
 const __ENDPOINT =
   window.location.host.indexOf("localhost") >= 0
-    ? "http://localhost:4000"
+    ? "http://192.168.1.200:4000"
     : window.location.host;
 
 export const socket = io(__ENDPOINT);
