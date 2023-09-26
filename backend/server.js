@@ -39,9 +39,12 @@ function NewRoom(roomID) {
     maxUsers: 5,
     lifespanSeconds: 0,
     users: [],
-    game: {
-      lifespanSeconds: 0,
-    },
+    state: 0,
+    responses: {},
+    judgeUsername: "",
+    articleViewerUsername: "",
+    articleTitle: "",
+    wikiUID: 0,
   };
 }
 
@@ -53,8 +56,7 @@ function RandomRoomID() {
 }
 
 function SendClientNeededRoomData(socketID, roomID) {
-  rooms[roomID].game.lifespanSeconds = rooms[roomID].lifespanSeconds;
-  io.to(socketID).emit(eventContract.GameUpdate, rooms[roomID].game);
+  io.to(socketID).emit(eventContract.GameUpdate, rooms[roomID]);
 }
 
 function CommunucateServerError(socket, code, message) {

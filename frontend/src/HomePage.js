@@ -18,7 +18,7 @@ const UsernameBounds = {
 export default function HomePage() {
   const [username, setUsername] = useState("");
   const [roomID, setRoomID] = useState("");
-  const [game, setGame] = useState(null);
+  const [room, setRoom] = useState(null);
 
   const [serverConnected, setServerConnected] = useState(socket.connected);
   const [roomConnected, setRoomConnected] = useState(false);
@@ -43,8 +43,8 @@ export default function HomePage() {
       setServerConnected(false);
     }
 
-    function onGameUpdate(data) {
-      setGame(data);
+    function onRoomUpdate(data) {
+      setRoom(data);
     }
     function onConnectToRoom() {
       setRoomConnected(true);
@@ -71,7 +71,7 @@ export default function HomePage() {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on(eventContract.GameUpdate, onGameUpdate);
+    socket.on(eventContract.GameUpdate, onRoomUpdate);
     socket.on(eventContract.ConnectToRoom, onConnectToRoom);
     socket.on(eventContract.New_RoomID, onNewRoomID);
     socket.on(eventContract.ServerError, onServerError);
@@ -79,20 +79,19 @@ export default function HomePage() {
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off(eventContract.GameUpdate, onGameUpdate);
+      socket.off(eventContract.GameUpdate, onRoomUpdate);
       socket.off(eventContract.ConnectToRoom, onConnectToRoom);
       socket.off(eventContract.New_RoomID, onNewRoomID);
       socket.off(eventContract.ServerError, onServerError);
     };
   }, [
-    game,
+    room,
     username,
     error,
     serverConnected,
     roomConnected,
     roomID,
     clientState,
-    JoinRoom,
   ]);
 
   function HandleJoinClick() {
@@ -200,7 +199,5 @@ export default function HomePage() {
 
   if (error) return errorBlock;
 
-  return (
-    <GameView socket={socket} username={username} roomID={roomID} game={game} />
-  );
+  return <GameView socket={socket} username={username} room={room} />;
 }

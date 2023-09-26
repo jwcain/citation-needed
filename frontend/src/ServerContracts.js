@@ -12,3 +12,10 @@ export const serverErrorContract = {
   InvalidRoom: 102,
   NameExists: 103,
 };
+
+export const GameState = {
+  PartyAssembly: 0,
+  JudgeSelection: 1,
+  ArticleSelection: 2,
+  Prompt: 3,
+};
