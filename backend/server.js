@@ -29,6 +29,7 @@ const serverErrorContract = {
   UnableToCreateRoom: 100,
   RoomIsFull: 101,
   InvalidRoom: 102,
+  NameExists: 103,
 };
 
 function NewRoom(roomID) {
@@ -92,6 +93,8 @@ io.on("connection", (socket) => {
     console.log("connect to room attempt");
     const room = rooms[connectionInfo.roomID];
     if (!room) {
+      console.log("Invalid room code");
+
       CommunucateServerError(
         socket,
         serverErrorContract.RoomIsFull,
@@ -101,33 +104,43 @@ io.on("connection", (socket) => {
     }
     var user = room.users.find((x) => x.username === connectionInfo.username);
     if (user) {
-      user.socketID = socket.id;
-      user.online = true;
-      updatedUser = user;
-      return;
-    }
-    //Check if this user would have to be added as a spectator
-    const wouldBeSpectator =
-      room.maxUsers <= room.users.filter((x) => x.isSpectator === false).length;
+      if (user.online) {
+        console.log("User already exists and is online.");
+        CommunucateServerError(
+          socket,
+          serverErrorContract.NameExists,
+          "Name already exists"
+        );
+        return;
+      } else {
+        user.socketID = socket.id;
+        user.online = true;
+      }
+    } else {
+      //Check if this user would have to be added as a spectator
+      const wouldBeSpectator =
+        room.maxUsers <=
+        room.users.filter((x) => x.isSpectator === false).length;
 
-    if (!room.spectatorsAllowed && wouldBeSpectator) {
-      CommunucateServerError(
-        socket,
-        serverErrorContract.RoomIsFull,
-        "Room is full."
-      );
-      return;
-    }
+      if (!room.spectatorsAllowed && wouldBeSpectator) {
+        CommunucateServerError(
+          socket,
+          serverErrorContract.RoomIsFull,
+          "Room is full."
+        );
+        return;
+      }
 
-    user = {
-      username: connectionInfo.username,
-      roomID: room.roomID,
-      online: true,
-      socketID: socket.id,
-      isSpectator: wouldBeSpectator,
-    };
-    console.log("pushing user");
-    room.users.push(user);
+      user = {
+        username: connectionInfo.username,
+        roomID: room.roomID,
+        online: true,
+        socketID: socket.id,
+        isSpectator: wouldBeSpectator,
+      };
+      console.log("pushing user");
+      room.users.push(user);
+    }
     socket.emit(eventContract.ConnectToRoom);
   });
   socket.on("disconnect", (socket) => {
@@ -152,7 +165,7 @@ async function ServerUpdateLoop() {
   while (true) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     serverUpTimeSeconds++;
-    if (serverUpTimeSeconds % 5 === 0)
+    if (serverUpTimeSeconds % 60 === 0)
       console.log(`Server Time: ${serverUpTimeSeconds}s`);
     if (rooms) {
       for (const roomID of Object.keys(rooms)) {

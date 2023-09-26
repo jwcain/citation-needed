@@ -10,4 +10,5 @@ export const serverErrorContract = {
   UnableToCreateRoom: 100,
   RoomIsFull: 101,
   InvalidRoom: 102,
+  NameExists: 103,
 };
