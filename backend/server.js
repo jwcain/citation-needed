@@ -23,6 +23,7 @@ const eventContract = {
   GameUpdate: "gameUpdate",
   OpenNewRoom: "openNewRoom",
   ConnectToRoom: "connectToRoom",
+  SetReady: "setReadyState",
 };
 
 const serverErrorContract = {
@@ -137,6 +138,7 @@ io.on("connection", (socket) => {
         username: connectionInfo.username,
         roomID: room.roomID,
         online: true,
+        ready: false,
         socketID: socket.id,
         isSpectator: wouldBeSpectator,
       };
@@ -144,6 +146,16 @@ io.on("connection", (socket) => {
       room.users.push(user);
     }
     socket.emit(eventContract.ConnectToRoom);
+  });
+  socket.on(eventContract.SetReady, (setState) => {
+    for (const roomID of Object.keys(rooms)) {
+      const user = rooms[roomID].users.find((x) => x.socketID === socket.id);
+      if (user) {
+        user.ready = setState;
+        CheckRoomForEndParty(rooms[roomID]);
+        break;
+      }
+    }
   });
   socket.on("disconnect", (socket) => {
     //Having to loop all games to find a user is probably bad.
@@ -162,6 +174,15 @@ const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+async function CheckRoomForEndParty(room) {
+  var playerCount = room.users.filter((x) => x.online).length;
+  var readyCount = room.users.filter((x) => x.ready).length;
+  if (playerCount >= 3 && readyCount >= playerCount) {
+    //TODO: Kickoff Game
+    console.log("Should kickoff game");
+  }
+}
 
 async function ServerUpdateLoop() {
   while (true) {
