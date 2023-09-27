@@ -35,6 +35,12 @@ async function GetNewQuery(queryReturnedCallback) {
     });
 }
 
+function TitleSanitizer(title) {
+  //Cut out everything after a comma or a parenthesis to keep it more vague.
+  //This allows for less disambiguation, and the removal of location specifiers.
+  return title.split(/[,()]/)[0];
+}
+
 export async function FindArticles(amt, arrayPopulator, completionCallback) {
   for (let i = 0; i < amt; i++) {
     if (!wikiQuery || pagesIndex >= pageQueryAmt) {
@@ -49,7 +55,8 @@ export async function FindArticles(amt, arrayPopulator, completionCallback) {
       article = wikiQuery.pages[pagesIndex++];
     } while (article && article.length < MIN_WORD_COUNT);
     if (article) {
-      arrayPopulator({ title: article.title, id: article.pageid });
+      const sanitizedTitle = TitleSanitizer(article.title);
+      arrayPopulator({ title: sanitizedTitle, id: article.pageid });
       pagesIndex++;
     } else i--;
   }
