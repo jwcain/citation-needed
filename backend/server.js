@@ -26,6 +26,7 @@ const eventContract = {
   OpenNewRoom: "openNewRoom",
   ConnectToRoom: "connectToRoom",
   SetReady: "setReadyState",
+  PickedArticle: "pickedArticle",
 };
 
 const serverErrorContract = {
@@ -38,32 +39,35 @@ const serverErrorContract = {
 
 export const GameState = {
   PartyAssembly: 0,
-  JudgeSelection: 1,
+  RoundSetup: 1,
   ArticleSelection: 2,
-  ArticleReadingAndLying: 3,
-  InitialPrompt: 4,
-  QuestionOne: 5,
-  ResponseOne: 6,
-  QuestionTwo: 7,
-  ResponseTwo: 8,
-  QuestionThree: 9,
-  ResponseThree: 10,
+  ArticleDisplay: 3,
+  Prompting: 4,
+  Responding: 5,
+  JudgeActions: 6,
 };
 
 function NewRoom(roomID) {
   return {
-    roomID: roomID,
+    //GameSettings
     spectatorsAllowed: true,
     maxUsers: 5,
+    readArticleTime: 60,
+    maxQuestions: 3,
+    //Metadata
+    roomID: roomID,
     lifespanSeconds: 0,
-    users: [],
     state: 0,
+    users: [],
+    //GameData
+    questions: ["Summarize the Wikipedia Article:"],
     responses: {},
     judgeUsername: "",
     articleOptions: [],
     articleViewerUsername: "",
     article: null,
-    wikiUID: 0,
+    questionRound: 0,
+    readingTimeEndUTC: 0,
   };
 }
 
@@ -107,6 +111,27 @@ io.on("connection", (socket) => {
     rooms[roomID] = NewRoom(roomID);
     socket.emit(eventContract.New_RoomID, roomID);
     SendClientNeededRoomData(socket.id, roomID);
+  });
+
+  socket.on(eventContract.PickedArticle, (info) => {
+    console.log("picked article");
+    const room = rooms[info.roomID];
+    if (!room) {
+      console.log("unable to find room");
+      return;
+    }
+    //Changes the game state to response
+    async function EndArticleReading(room, timeMiliseconds) {
+      await new Promise((resolve) => setTimeout(resolve, timeMiliseconds));
+      room.state = GameState.Responding;
+    }
+
+    const readTime = (room.readArticleTime + 1) * 1000;
+    //Calculate when this will be done, so we can set a timer.
+    room.readingTimeEndUTC = Date.now() + readTime;
+    room.article = info.article;
+    room.state = GameState.ArticleDisplay;
+    EndArticleReading(room, readTime);
   });
 
   //When a user connects to the server
@@ -206,7 +231,7 @@ async function TryToStartGame(room) {
   var readyCount = room.users.filter((x) => x.ready).length;
   if (playerCount < 3 || readyCount < playerCount) return;
 
-  room.state = GameState.JudgeSelection;
+  room.state = GameState.RoundSetup;
   room.judgeUsername =
     room.users[Math.floor(Math.random() * room.users.length)].username;
   do {
