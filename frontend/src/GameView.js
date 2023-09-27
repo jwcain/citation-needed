@@ -34,17 +34,24 @@ export default function GameView({ socket, localUsername, room }) {
     if (room.articleViewerUsername !== localUsername)
       return (
         <div>
-          <h2>You are a liar! The Title is</h2>
-          <h1>{room.articleTitle}</h1>
+          <h2>You are a liar!</h2>
+          <p>The article viewer is selecting their article.</p>
           <p>{room.judgeUsername} is the Editor (Judge)!</p>
         </div>
       );
 
     return (
       <div>
-        <h1>{room.judgeUsername} is the Editor (Judge)!</h1>
-        <WikipediaPage id={65781072} />
+        <h1>You are the Article Viewer, pick an Article!</h1>
+        <p>{room.judgeUsername} is the Editor (Judge)!</p>
+        {room.articleOptions.map((item, index) => (
+          <ArticleDisplay title={item.title} />
+        ))}
       </div>
     );
   }
+}
+
+function ArticleDisplay({ title }) {
+  return <p>{title}</p>;
 }
