@@ -48,3 +48,18 @@
   background-color: palevioletred;
   border-style: dashed;
 }
+
+.articleButton {
+  height: 50px;
+  margin-bottom: 15px;
+  width: 20%;
+  min-width: fit-content;
+  background-color: lightgray;
+  border-style: solid;
+}
+
+.articleButton:hover {
+  border: silver;
+  border-style: groove;
+  background-color: floralwhite;
+}

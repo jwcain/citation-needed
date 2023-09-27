@@ -5,6 +5,7 @@ export const eventContract = {
   OpenNewRoom: "openNewRoom",
   ConnectToRoom: "connectToRoom",
   SetReady: "setReadyState",
+  PickedArticle: "pickedArticle",
 };
 
 export const serverErrorContract = {
@@ -17,14 +18,14 @@ export const serverErrorContract = {
 
 export const GameState = {
   PartyAssembly: 0,
-  JudgeSelection: 1,
+  RoundSetup: 1,
   ArticleSelection: 2,
-  ArticleReadingAndLying: 3,
-  InitialPrompt: 4,
-  QuestionOne: 5,
-  ResponseOne: 6,
-  QuestionTwo: 7,
-  ResponseTwo: 8,
-  QuestionThree: 9,
-  ResponseThree: 10,
+  ArticleDisplay: 3,
+  Prompting: 4,
+  Responding: 5,
+  JudgeActions: 6,
+};
+export const ClientState = {
+  Free: "free",
+  AwaitingResponse: "awaitingResponse",
 };

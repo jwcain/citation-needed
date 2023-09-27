@@ -1,14 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { socket } from "./socket.js";
 import React, { useState, useEffect } from "react";
-import { serverErrorContract, eventContract } from "./ServerContracts.js";
+import {
+  serverErrorContract,
+  eventContract,
+  ClientState,
+} from "./ServerContracts.js";
 import "./HomePage.css";
 import GameView from "./GameView.js";
-
-const ClientState = {
-  Free: "free",
-  AwaitingResponse: "awaitingResponse",
-};
 
 const UsernameBounds = {
   Upper: 11,
@@ -136,8 +135,8 @@ export default function HomePage() {
           id="usernameEntry"
           name="usernameEntry"
           required
-          minlength={UsernameBounds.Lower}
-          maxlength={UsernameBounds.Upper}
+          minLength={UsernameBounds.Lower}
+          maxLength={UsernameBounds.Upper}
           size="10"
           onChange={HandleUsernameChange}
         />
@@ -154,8 +153,8 @@ export default function HomePage() {
           id="roomIDEntry"
           name="roomIDEntry"
           required
-          minlength="6"
-          maxlength="6"
+          minLength="6"
+          maxLength="6"
           size="10"
           onChange={HandleRoomIDChange}
         />
@@ -194,5 +193,13 @@ export default function HomePage() {
 
   if (error) return errorBlock;
 
-  return <GameView socket={socket} localUsername={username} room={room} />;
+  return (
+    <GameView
+      socket={socket}
+      localUsername={username}
+      room={room}
+      clientState={clientState}
+      setClientState={setClientState}
+    />
+  );
 }
