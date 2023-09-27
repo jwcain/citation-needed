@@ -1,3 +1,4 @@
+import https from "https";
 var wikiQuery = null;
 var pagesIndex = 0;
 var pageQueryAmt = 500;
@@ -10,24 +11,28 @@ async function GetNewQuery(queryReturnedCallback) {
   pagesIndex = 0;
   wikiQuery = null;
   //get new request
-  let request = new XMLHttpRequest();
-  request.open(
-    "GET",
-    `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info&generator=random&formatversion=2&grnnamespace=0&grnlimit=${pageQueryAmt}&origin=*`
-  );
-  request.onload = () => {
-    if (!loading) return;
-    if (request.status !== 200) {
-      console.log("xhr ERROR, bad status");
-    } else {
-      wikiQuery = JSON.parse(request.response).query;
-      queryReturnedCallback();
-    }
-  };
-  request.onerror = (e) => {
-    console.log(`xhr ERROR, ${e.type}`);
-  };
-  request.send(null);
+  console.log("Get new Query");
+  https
+    .get(
+      `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info&generator=random&formatversion=2&grnnamespace=0&grnlimit=${pageQueryAmt}&origin=*`,
+      (res) => {
+        let data = "";
+
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        // Ending the response
+        res.on("end", () => {
+          console.log("end!");
+          wikiQuery = JSON.parse(data).query;
+          queryReturnedCallback();
+        });
+      }
+    )
+    .on("error", (err) => {
+      console.log("Error: ", err);
+    });
 }
 
 export async function FindArticles(amt, arrayPopulator, completionCallback) {
@@ -42,9 +47,11 @@ export async function FindArticles(amt, arrayPopulator, completionCallback) {
     var article;
     do {
       article = wikiQuery.pages[pagesIndex++];
-    } while (article.length < MIN_WORD_COUNT);
-    arrayPopulator({ title: article.title, id: article.id });
-    pagesIndex++;
+    } while (article && article.length < MIN_WORD_COUNT);
+    if (article) {
+      arrayPopulator({ title: article.title, id: article.pageid });
+      pagesIndex++;
+    } else i--;
   }
   completionCallback();
 }
