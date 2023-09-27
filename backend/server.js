@@ -3,6 +3,7 @@ import path from "path";
 import { Server } from "socket.io";
 import express from "express";
 import { Console } from "console";
+import { FindArticles } from "./ArticlePopulator.js";
 
 const app = express();
 const __dirname = path.resolve();
@@ -31,6 +32,21 @@ const serverErrorContract = {
   RoomIsFull: 101,
   InvalidRoom: 102,
   NameExists: 103,
+  GameStarted: 104,
+};
+
+export const GameState = {
+  PartyAssembly: 0,
+  JudgeSelection: 1,
+  ArticleSelection: 2,
+  ArticleReadingAndLying: 3,
+  InitialPrompt: 4,
+  QuestionOne: 5,
+  ResponseOne: 6,
+  QuestionTwo: 7,
+  ResponseTwo: 8,
+  QuestionThree: 9,
+  ResponseThree: 10,
 };
 
 function NewRoom(roomID) {
@@ -43,8 +59,9 @@ function NewRoom(roomID) {
     state: 0,
     responses: {},
     judgeUsername: "",
+    articleOptions: [],
     articleViewerUsername: "",
-    articleTitle: "",
+    article: null,
     wikiUID: 0,
   };
 }
@@ -119,6 +136,14 @@ io.on("connection", (socket) => {
         user.socketID = socket.id;
         user.online = true;
       }
+    } else if (room.state !== GameState.PartyAssembly) {
+      console.log("Game in progress");
+      CommunucateServerError(
+        socket,
+        serverErrorContract.GameStarted,
+        "Game already in progress"
+      );
+      return;
     } else {
       //Check if this user would have to be added as a spectator
       const wouldBeSpectator =
@@ -152,7 +177,7 @@ io.on("connection", (socket) => {
       const user = rooms[roomID].users.find((x) => x.socketID === socket.id);
       if (user) {
         user.ready = setState;
-        CheckRoomForEndParty(rooms[roomID]);
+        TryToStartGame(rooms[roomID]);
         break;
       }
     }
@@ -175,13 +200,27 @@ httpServer.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
 
-async function CheckRoomForEndParty(room) {
+async function TryToStartGame(room) {
   var playerCount = room.users.filter((x) => x.online).length;
   var readyCount = room.users.filter((x) => x.ready).length;
-  if (playerCount >= 3 && readyCount >= playerCount) {
-    //TODO: Kickoff Game
-    console.log("Should kickoff game");
-  }
+  if (playerCount < 3 || readyCount < playerCount) return;
+
+  room.state = GameState.JudgeSelection;
+  room.judgeUsername =
+    room.users[Math.floor(Math.random() * room.users.length)].username;
+  do {
+    room.articleViewerUsername =
+      room.users[Math.floor(Math.random() * room.users.length)].username;
+  } while (room.judgeUsername === room.articleViewerUsername);
+
+  room.articleOptions = [];
+  FindArticles(
+    5,
+    (value) => room.articleOptions.push(value),
+    () => {
+      room.state = GameState.ArticleSelection;
+    }
+  );
 }
 
 async function ServerUpdateLoop() {
@@ -202,4 +241,5 @@ async function ServerUpdateLoop() {
   }
 }
 
+PopulateArticlesRoutine();
 ServerUpdateLoop();
