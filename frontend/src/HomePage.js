@@ -60,11 +60,6 @@ export default function HomePage() {
 
     function onServerError(error) {
       setError(error.message);
-      if (error.code === serverErrorContract.UnableToCreateRoom) {
-      } else if (error.code === serverErrorContract.RoomIsFull) {
-      } else if (error.code === serverErrorContract.InvalidRoom) {
-      } else if (error.code === serverErrorContract.NameExists) {
-      }
       setRoomConnected("");
       setClientState(ClientState.Free);
     }

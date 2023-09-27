@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./GameView.css";
-import { LobbySlot } from "./LobbySlot";
-import { serverErrorContract, eventContract } from "./ServerContracts.js";
+import { serverErrorContract, GameState } from "./ServerContracts.js";
+import { PartyCreation } from "./PartyCreation";
+import WikipediaPage from "./WikipediaPage.js";
 
 export default function GameView({ socket, localUsername, room }) {
   if (room == null) {
@@ -10,56 +11,40 @@ export default function GameView({ socket, localUsername, room }) {
   }
   const lifespan = room.lifespanSeconds;
 
-  return (
-    <div>
-      <h1>{room.roomID}</h1>
-      <PartyCreation
-        socket={socket}
-        room={room}
-        localUsername={localUsername}
-      />
-      <p>Room Time:{lifespan}</p>
-    </div>
-  );
-}
+  if (room.state === GameState.PartyAssembly)
+    return (
+      <div>
+        <h1>{room.roomID}</h1>
+        <PartyCreation
+          socket={socket}
+          room={room}
+          localUsername={localUsername}
+        />
+      </div>
+    );
+  else if (room.state === GameState.JudgeSelection)
+    return (
+      <div>
+        <p>An Editor (Judge) is being selected...</p>
+      </div>
+    );
+  else if (room.state === GameState.ArticleSelection) {
+    if (room.judgeUsername === localUsername)
+      return <h1>You are the Editor (Judge)!</h1>;
+    if (room.articleViewerUsername !== localUsername)
+      return (
+        <div>
+          <h2>You are a liar! The Title is</h2>
+          <h1>{room.articleTitle}</h1>
+          <p>{room.judgeUsername} is the Editor (Judge)!</p>
+        </div>
+      );
 
-function PartyCreation({ socket, room, localUsername }) {
-  function SetReady(user, setValue) {
-    socket.emit(eventContract.SetReady, setValue);
+    return (
+      <div>
+        <h1>{room.judgeUsername} is the Editor (Judge)!</h1>
+        <WikipediaPage id={65781072} />
+      </div>
+    );
   }
-
-  var lobbyList = [];
-
-  for (let i = 0; i < room.maxUsers; i++) {
-    var user = room.users[i];
-    if (user && user.username === localUsername)
-      lobbyList.push(
-        <LobbySlot
-          username={user.username}
-          ready={user.ready}
-          isLocal={true}
-          setReady={(v) => SetReady(room.users[i], v)}
-        />
-      );
-    else if (user)
-      lobbyList.push(
-        <LobbySlot
-          username={user.username}
-          ready={user.ready}
-          isLocal={false}
-          setReady={null}
-        />
-      );
-    else
-      lobbyList.push(
-        <LobbySlot
-          username={""}
-          ready={false}
-          isLocal={false}
-          setReady={null}
-        />
-      );
-  }
-
-  return <div>{lobbyList}</div>;
 }
