@@ -1,4 +1,5 @@
 import http from "http";
+
 import path from "path";
 import { Server } from "socket.io";
 import express from "express";
@@ -227,7 +228,7 @@ async function ServerUpdateLoop() {
   while (true) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     serverUpTimeSeconds++;
-    if (serverUpTimeSeconds % 60 === 0)
+    if (serverUpTimeSeconds % 10 === 0)
       console.log(`Server Time: ${serverUpTimeSeconds}s`);
     if (rooms) {
       for (const roomID of Object.keys(rooms)) {
@@ -241,5 +242,4 @@ async function ServerUpdateLoop() {
   }
 }
 
-PopulateArticlesRoutine();
 ServerUpdateLoop();
