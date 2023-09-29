@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./GameView.css";
-import {
-  serverErrorContract,
-  eventContract,
-  GameState,
-  ClientState,
-} from "./ServerContracts.js";
+import { eventContract, GameState, ClientState } from "./ServerContracts.js";
 import { PartyCreation } from "./GameViews/PartyCreation";
 import { ArticleSelection } from "./GameViews/ArticleSelection";
 import { ArticleDisplay } from "./GameViews/ArticleDisplay";

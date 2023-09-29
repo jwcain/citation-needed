@@ -1,11 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { socket } from "./socket.js";
 import React, { useState, useEffect } from "react";
-import {
-  serverErrorContract,
-  eventContract,
-  ClientState,
-} from "./ServerContracts.js";
+import { eventContract, ClientState } from "./ServerContracts.js";
 import "./HomePage.css";
 import GameView from "./GameView.js";
 
@@ -23,15 +19,6 @@ export default function HomePage() {
   const [roomConnected, setRoomConnected] = useState(false);
   const [clientState, setClientState] = useState(ClientState.Free);
   const [error, setError] = useState("");
-
-  function JoinRoom(roomID) {
-    if (!UsernameValid() || roomID.length !== 6) return;
-    socket.emit(eventContract.ConnectToRoom, {
-      username: username,
-      roomID: roomID,
-    });
-    setClientState(ClientState.AwaitingResponse);
-  }
 
   useEffect(() => {
     function onConnect() {
@@ -54,7 +41,19 @@ export default function HomePage() {
       //Update State
       setRoomID(data);
       //Join that room id
-      JoinRoom(data);
+      if (
+        !(
+          UsernameBounds.Lower <= username.length &&
+          username.length <= UsernameBounds.Upper
+        ) ||
+        roomID.length !== 6
+      )
+        return;
+      socket.emit(eventContract.ConnectToRoom, {
+        username: username,
+        roomID: roomID,
+      });
+      setClientState(ClientState.AwaitingResponse);
     }
 
     function onServerError(error) {
@@ -90,14 +89,19 @@ export default function HomePage() {
 
   function HandleJoinClick() {
     if (clientState !== ClientState.Free) return;
-    JoinRoom(roomID);
+    if (
+      !(
+        UsernameBounds.Lower <= username.length &&
+        username.length <= UsernameBounds.Upper
+      ) ||
+      roomID.length !== 6
+    )
+      return;
+    socket.emit(eventContract.ConnectToRoom, {
+      username: username,
+      roomID: roomID,
+    });
     setClientState(ClientState.AwaitingResponse);
-    setError("");
-  }
-
-  function HandleNewRoomClick() {
-    if (clientState !== ClientState.Free) return;
-    socket.emit(eventContract.OpenNewRoom);
     setClientState(ClientState.AwaitingResponse);
     setError("");
   }
@@ -108,6 +112,14 @@ export default function HomePage() {
       username.length <= UsernameBounds.Upper
     );
   }
+
+  function HandleNewRoomClick() {
+    if (clientState !== ClientState.Free) return;
+    socket.emit(eventContract.OpenNewRoom);
+    setClientState(ClientState.AwaitingResponse);
+    setError("");
+  }
+
   function HandleUsernameChange(e) {
     var value = e.target.value;
     value = value.toUpperCase();

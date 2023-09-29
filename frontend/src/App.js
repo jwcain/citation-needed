@@ -30,11 +30,11 @@ function Header() {
     </header>
   );
 }
-
+/*
 function Footer() {
   return (
     <footer className="footer">
       <div className="text-center">In Development. All Rights Reserved.</div>
     </footer>
   );
-}
+}*/
