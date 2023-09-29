@@ -1,6 +1,6 @@
 import React from "react";
-import { LobbySlot } from "./LobbySlot";
-import { eventContract } from "./ServerContracts.js";
+import { LobbySlot } from "../utils/LobbySlot";
+import { eventContract } from "../ServerContracts.js";
 
 export function PartyCreation({ socket, room, localUsername }) {
   function SetReady(user, setValue) {
