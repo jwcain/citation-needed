@@ -1,11 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HomePage from "./HomePage.js";
-import "./App.css";
+import "./css/App.css";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="d-flex flex-column min-vh-100">
+      <div>
         <Header />
         <Main />
       </div>

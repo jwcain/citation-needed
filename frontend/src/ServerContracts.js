@@ -6,6 +6,7 @@ export const eventContract = {
   ConnectToRoom: "connectToRoom",
   SetReady: "setReadyState",
   PickedArticle: "pickedArticle",
+  QuestionResponse: "questionResponse",
 };
 
 export const serverErrorContract = {

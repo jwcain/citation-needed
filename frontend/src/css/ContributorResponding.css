@@ -1,0 +1,61 @@
+.dialogue {
+  border: solid;
+  background-color: beige;
+  margin: 5px;
+  padding: 5px;
+  display: block;
+  min-height: 50px;
+  height: fit-content;
+}
+
+.textBlock {
+  display: flex;
+  min-width: 50px;
+}
+
+.textBlock.editor {
+  justify-content: left;
+  align-items: left;
+}
+
+.textBlock.contributor {
+  align-items: right;
+  justify-content: right;
+}
+
+.name {
+  display: block;
+  margin: 5px;
+  padding: 5px;
+  min-width: 50px;
+  width: fit-content;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.name.judge {
+  border: solid;
+  background-color: lightgreen;
+}
+
+.name.contributor {
+  border: solid;
+  background-color: lightblue;
+}
+.inline-span {
+  justify-content: center;
+  align-items: center;
+  display: inline-flexbox;
+}
+
+.dialogeInput {
+  margin-top: 10px;
+  width: 40%;
+  height: 5em;
+}
+
+.dialogeInputButton {
+  margin-top: 5px;
+  width: 40%;
+}

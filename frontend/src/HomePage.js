@@ -2,8 +2,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { socket } from "./socket.js";
 import React, { useState, useEffect } from "react";
 import { eventContract, ClientState } from "./ServerContracts.js";
-import "./HomePage.css";
+import "./css/HomePage.css";
 import GameView from "./GameView.js";
+import "./css/Columns.css";
 
 const UsernameBounds = {
   Upper: 11,
@@ -46,12 +47,12 @@ export default function HomePage() {
           UsernameBounds.Lower <= username.length &&
           username.length <= UsernameBounds.Upper
         ) ||
-        roomID.length !== 6
+        data.length !== 6
       )
         return;
       socket.emit(eventContract.ConnectToRoom, {
         username: username,
-        roomID: roomID,
+        roomID: data,
       });
       setClientState(ClientState.AwaitingResponse);
     }
@@ -87,6 +88,53 @@ export default function HomePage() {
     clientState,
   ]);
 
+  var errorBlock;
+  if (error) {
+    errorBlock = <p>Error: {error}</p>;
+  } else errorBlock = <></>;
+
+  if (!serverConnected) return <div>Connected to Server...{errorBlock}</div>;
+  if (!roomConnected) {
+    return (
+      <div>
+        {errorBlock}
+        <RoomConnection
+          roomID={roomID}
+          setRoomID={setRoomID}
+          username={username}
+          setUsername={setUsername}
+          clientState={clientState}
+          setClientState={setClientState}
+          error={error}
+          setError={setError}
+        />
+      </div>
+    );
+  }
+
+  if (error) return errorBlock;
+
+  return (
+    <GameView
+      socket={socket}
+      localUsername={username}
+      room={room}
+      clientState={clientState}
+      setClientState={setClientState}
+    />
+  );
+}
+
+function RoomConnection({
+  roomID,
+  setRoomID,
+  username,
+  setUsername,
+  clientState,
+  setClientState,
+  error,
+  setError,
+}) {
   function HandleJoinClick() {
     if (clientState !== ClientState.Free) return;
     if (
@@ -104,13 +152,6 @@ export default function HomePage() {
     setClientState(ClientState.AwaitingResponse);
     setClientState(ClientState.AwaitingResponse);
     setError("");
-  }
-
-  function UsernameValid() {
-    return (
-      UsernameBounds.Lower <= username.length &&
-      username.length <= UsernameBounds.Upper
-    );
   }
 
   function HandleNewRoomClick() {
@@ -131,87 +172,69 @@ export default function HomePage() {
     setRoomID(value);
   }
 
-  var errorBlock;
-  if (error) {
-    errorBlock = <p>Error: {error}</p>;
-  } else errorBlock = <></>;
-
-  if (!serverConnected) return <div>Connected to Server...{errorBlock}</div>;
-  if (!roomConnected) {
-    const enterNameBlock = (
-      <div>
-        <p>Enter Name</p>
-        <input
-          className="capital-input"
-          type="text"
-          id="usernameEntry"
-          name="usernameEntry"
-          required
-          minLength={UsernameBounds.Lower}
-          maxLength={UsernameBounds.Upper}
-          size="10"
-          onChange={HandleUsernameChange}
-        />
-        <br />
-        <br />
-      </div>
+  function UsernameValid() {
+    return (
+      UsernameBounds.Lower <= username.length &&
+      username.length <= UsernameBounds.Upper
     );
-    const enterRoomKeyBlock = (
-      <div>
-        <p>Enter Room Key</p>
-        <input
-          className="capital-input"
-          type="text"
-          id="roomIDEntry"
-          name="roomIDEntry"
-          required
-          minLength="6"
-          maxLength="6"
-          size="10"
-          onChange={HandleRoomIDChange}
-        />
-      </div>
-    );
-    if (UsernameValid() && clientState === ClientState.Free) {
-      return (
-        <div>
-          {enterNameBlock}
-          {enterRoomKeyBlock}
-          <button onClick={HandleJoinClick}>Join Room</button>
-          <br />
-          <br />
-          <button onClick={HandleNewRoomClick}>Create New Room</button>
-          {errorBlock}
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          {enterNameBlock}
-          {enterRoomKeyBlock}
-          <button onClick={HandleJoinClick} disabled>
-            Join Room
-          </button>
-          <br />
-          <br />
-          <button onClick={HandleNewRoomClick} disabled>
-            Create New Room
-          </button>
-          {errorBlock}
-        </div>
-      );
-    }
+  }
+  function RoomIDValid() {
+    return roomID.length === 6;
   }
 
-  if (error) return errorBlock;
-
   return (
-    <GameView
-      socket={socket}
-      localUsername={username}
-      room={room}
-      clientState={clientState}
-      setClientState={setClientState}
-    />
+    <div>
+      <div className="column center">
+        <div>
+          <p>Enter Name</p>
+          <input
+            className="capital-input"
+            type="text"
+            id="usernameEntry"
+            name="usernameEntry"
+            required
+            minLength={UsernameBounds.Lower}
+            maxLength={UsernameBounds.Upper}
+            size="10"
+            onChange={HandleUsernameChange}
+          />
+        </div>
+        <div>
+          <p>Enter Room Key</p>
+          <input
+            className="capital-input"
+            type="text"
+            id="roomIDEntry"
+            name="roomIDEntry"
+            required
+            minLength="6"
+            maxLength="6"
+            size="10"
+            onChange={HandleRoomIDChange}
+          />
+        </div>
+        <br />
+        <div>
+          {RoomIDValid() ? (
+            <button onClick={HandleJoinClick}>Join Room</button>
+          ) : (
+            <button onClick={HandleJoinClick} disabled>
+              Join Room
+            </button>
+          )}
+        </div>
+        <br />
+        <div>
+          {UsernameValid() ? (
+            <button onClick={HandleNewRoomClick}>Create New Room</button>
+          ) : (
+            <button onClick={HandleNewRoomClick} disabled>
+              Create New Room
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="scrollPadding"></div>
+    </div>
   );
 }

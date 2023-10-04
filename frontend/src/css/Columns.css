@@ -1,0 +1,31 @@
+.column {
+  margin-top: 0;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.column.side {
+  margin-top: 0;
+  width: 20%;
+  background-color: lightgreen;
+}
+
+.column.side.left {
+  justify-content: right;
+  text-align: right;
+}
+
+.column.side.right {
+  justify-content: left;
+  text-align: left;
+}
+
+.column.center {
+  width: 50%;
+  max-width: 64em;
+  justify-content: center;
+  text-align: center;
+  background-color: lightgray;
+}

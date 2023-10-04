@@ -1,6 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./GameView.css";
+import "./css/GameView.css";
 import { eventContract, GameState, ClientState } from "./ServerContracts.js";
 import { PartyCreation } from "./GameViews/PartyCreation";
 import { ArticleSelection } from "./GameViews/ArticleSelection";
@@ -55,15 +55,38 @@ export default function GameView({
       />
     );
   } else if (room.state === GameState.ArticleDisplay) {
-    //TODO: this is bad, we are just assuming that article reading has no time
     setClientState(ClientState.Free);
-    return <ArticleDisplay room={room} localUsername={localUsername} />;
+    return (
+      <ArticleDisplay
+        socket={socket}
+        room={room}
+        localUsername={localUsername}
+      />
+    );
   } else if (room.state === GameState.Responding) {
-    return <ContributorResponding room={room} localUsername={localUsername} />;
+    return (
+      <ContributorResponding
+        socket={socket}
+        room={room}
+        localUsername={localUsername}
+      />
+    );
   } else if (room.state === GameState.Prompting) {
-    return <EditorPrompting room={room} localUsername={localUsername} />;
+    return (
+      <EditorPrompting
+        socket={socket}
+        room={room}
+        localUsername={localUsername}
+      />
+    );
   } else if (room.state === GameState.JudgeActions) {
-    return <EditorJudging room={room} localUsername={localUsername} />;
+    return (
+      <EditorJudging
+        socket={socket}
+        room={room}
+        localUsername={localUsername}
+      />
+    );
   }
 
   return <div>You have reached an unhandled GameState.</div>;

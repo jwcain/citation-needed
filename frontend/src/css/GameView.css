@@ -1,11 +1,10 @@
 .lobbySlot {
   height: 50px;
-  width: 20%;
+  width: 100%;
   border-style: solid;
   border-width: 2px;
   text-align: center;
   min-width: fit-content;
-  margin-left: 40%;
   align-items: center;
   margin-bottom: 5px;
   padding-top: 10px;

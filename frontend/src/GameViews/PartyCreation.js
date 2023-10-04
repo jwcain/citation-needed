@@ -18,6 +18,7 @@ export function PartyCreation({ socket, room, localUsername }) {
           ready={user.ready}
           isLocal={true}
           setReady={(v) => SetReady(room.users[i], v)}
+          key={user.username}
         />
       );
     else if (user)
@@ -27,6 +28,7 @@ export function PartyCreation({ socket, room, localUsername }) {
           ready={user.ready}
           isLocal={false}
           setReady={null}
+          key={user.username}
         />
       );
     else
@@ -36,9 +38,16 @@ export function PartyCreation({ socket, room, localUsername }) {
           ready={false}
           isLocal={false}
           setReady={null}
+          key={i}
         />
       );
   }
 
-  return <div>{lobbyList}</div>;
+  return (
+    <div>
+      <div className="column left"></div>
+      <div className="column center">{lobbyList}</div>
+      <div className="column right"></div>
+    </div>
+  );
 }
